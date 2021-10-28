@@ -1,4 +1,5 @@
-using EducateApp.Models;
+﻿using EducateApp.Models;
+using EducateApp.Models.Validators;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -24,8 +25,16 @@ namespace EducateApp
             services.AddDbContext<AppCtx>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
+            // Äîáàâëåíèå ñåðâèñà âàëèäàòîðà ïàðîëÿ
+            services.AddTransient<IPasswordValidator<User>, CustomPasswordValidator>(
+                serv => new CustomPasswordValidator(8));
+
+            // Äîáàâëåíèå ñåðâèñà âàëèäàòîðà ïîëüçîâàòåëÿ
+            services.AddTransient<IUserValidator<User>, CustomUserValidator>();
+
             services.AddIdentity<User, IdentityRole>()
                 .AddEntityFrameworkStores<AppCtx>();
+
             services.AddControllersWithViews();
         }
 
@@ -47,7 +56,7 @@ namespace EducateApp
 
             app.UseRouting();
 
-            app.UseAuthentication();    // ����������� ��������������
+            app.UseAuthentication();    
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
